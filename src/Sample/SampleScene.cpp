@@ -4,18 +4,18 @@
 #include "InputManager.h"
 #include "Debug.h"
 
-void SampleScene::OnInitialize()
+void SanboxScene::OnInitialize()
 {
-    mpEntity1 = CreateEntity<DummyEntity>(40.f, Color::Cyan);
+    mpEntity1 = CreateEntity<Player>(40.f, Color::Cyan);
     mpEntity1->SetPosition({ 300.f, 360.f });
     mpEntity1->SetRigidBody(true);
 
-    mpEntity2 = CreateEntity<DummyEntity>(60.f, Color::Orange);
+    mpEntity2 = CreateEntity<Player>(60.f, Color::Orange);
     mpEntity2->SetPosition({ 700.f, 360.f });
     mpEntity2->SetRigidBody(true);
 }
 
-void SampleScene::OnUpdate()
+void SanboxScene::OnUpdate()
 {
     Debug::DrawText({ 10.f, 10.f },
         "Clic gauche : selectionner un cercle, puis cliquer pour le déplacer.", Color::White);

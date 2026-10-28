@@ -1,5 +1,5 @@
 #include "DummyEntity.h"
 
-void DummyEntity::OnCollision(Entity*)
+void Player::OnCollision(Entity*)
 {
 }

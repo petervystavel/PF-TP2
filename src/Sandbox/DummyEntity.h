@@ -1,7 +1,7 @@
 #pragma once
 #include "Entity.h"
 
-class DummyEntity : public Entity
+class Player : public Entity
 {
 public:
     void OnCollision(Entity* other) override;

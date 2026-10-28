@@ -1,5 +1,7 @@
 #include "Grid.h"
 
+#include <queue>
+
 Grid::Grid(const std::vector< std::vector<char>>& map)
 {
     RowCount = map.size();
@@ -59,15 +61,15 @@ bool Grid::BuildPath(const GridCoord* startCoord, const GridCoord* endCoord)
     Tile* start = GetTile(startCoord);
     Tile* end = GetTile(endCoord);
 
-    std::vector<Tile*> remains;
+    std::queue<Tile*> remains;
     start->added = true;
-    remains.push_back(start);
+    remains.push(start);
 
     while (remains.size() > 0)
     {
-        Tile* current = remains[0];
-        remains.erase(remains.begin());
-
+        Tile* current = remains.front();
+        remains.pop();
+        
         if (current == end)
         {
             while (current != nullptr)
@@ -98,7 +100,7 @@ bool Grid::BuildPath(const GridCoord* startCoord, const GridCoord* endCoord)
 
             neighbor->added = true;
             neighbor->cameFrom = current;
-            remains.push_back(neighbor);
+            remains.push(neighbor);
         }
     }
 

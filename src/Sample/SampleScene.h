@@ -2,14 +2,14 @@
 
 #include "Scene.h"
 
-class DummyEntity;
+class Player;
 
-class SampleScene : public Scene
+class SanboxScene : public Scene
 {
-    DummyEntity* mpEntity1 = nullptr;
-    DummyEntity* mpEntity2 = nullptr;
+    Player* mpEntity1 = nullptr;
+    Player* mpEntity2 = nullptr;
 
-    DummyEntity* mpSelectedEntity = nullptr;
+    Player* mpSelectedEntity = nullptr;
 
 public:
     void OnInitialize() override;

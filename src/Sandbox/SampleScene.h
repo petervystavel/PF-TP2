@@ -1,15 +1,18 @@
 #pragma once
 
 #include "Scene.h"
+#include "Grid.h"
 
-class DummyEntity;
+class Player;
 
-class SampleScene : public Scene
+class SanboxScene : public Scene
 {
-    DummyEntity* mpEntity1 = nullptr;
-    DummyEntity* mpEntity2 = nullptr;
+    Player* mPlayer;
 
-    DummyEntity* mpSelectedEntity = nullptr;
+    Grid* mpGrid;
+
+    int mRowSize;
+    int mColSize;
 
 public:
     void OnInitialize() override;
