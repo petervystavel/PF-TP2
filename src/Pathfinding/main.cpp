@@ -1,182 +1,149 @@
-#include <iostream>
+#include <vector>
 #include <conio.h>
+
+#include "Grid.h"
 
 #define NOMINMAX
 #include <windows.h>
 
-#define BG_RED "\033[41m"
-#define BG_GREEN "\033[42m"
-#define DEFAULT "\033[0m"
-
-#define ENTER 13
-
-constexpr int ROWS = 10;
-constexpr int COLS = 10;
-
-void gotoxy(short x, short y) 
+void gotoxy(short x, short y)
 {
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	COORD position = { x, y };
-	SetConsoleCursorPosition(hConsole, position);
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD position = { x, y };
+    SetConsoleCursorPosition(hConsole, position);
 }
 
 void hidecursor()
 {
-	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_CURSOR_INFO info;
-	info.dwSize = 100;
-	info.bVisible = FALSE;
-	SetConsoleCursorInfo(consoleHandle, &info);
+    HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO info;
+    info.dwSize = 100;
+    info.bVisible = FALSE;
+    SetConsoleCursorInfo(consoleHandle, &info);
 }
 
-void Refresh() 
+class App
 {
-	gotoxy(0, 0);
-}
+    Grid* mGrid;
 
-class Grid 
-{
-	int playerRow = 0;
-	int playerCol = 0;
+    GridCoord* mPlayerCoord;
+    GridCoord* mCursorCoord;
 
-	int cursorRow = 0;
-	int cursorCol = 0;
-
-	bool isInPath[ROWS][COLS];
+    std::vector<std::vector<char>> map =
+    {
+        {' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+        {'#','#','#','#','#',' ','#',' ',' ',' ' },
+        {' ','#','#','#',' ',' ','#',' ',' ',' ' },
+        {' ',' ','#',' ',' ',' ','#',' ',' ',' ' },
+        {' ',' ',' ',' ',' ',' ','#',' ',' ',' ' },
+        {' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
+        {' ',' ',' ',' ',' ',' ','#',' ',' ',' ' },
+        {' ',' ',' ',' ',' ',' ','#',' ',' ',' ' },
+        {' ',' ',' ',' ',' ',' ','#','#',' ',' ' },
+        {' ',' ',' ',' ',' ',' ','#','#','#',' ' },
+    };
 
 public:
-	void Run()
-	{
-		ResetPath();
+    App()
+    {
+        mGrid = new Grid(map);
+        mPlayerCoord = mGrid->CreateCoord();
+        mCursorCoord = mGrid->CreateCoord();
+    }
 
-		while (true) 
-		{
-			Display();
-			Input();
-			Path();
+    ~App()
+    {
+        delete mGrid;
+        delete mPlayerCoord;
+        delete mCursorCoord;
+    }
 
-			Refresh();
-		}
-	}
+    void Run()
+    {
+        hidecursor();
 
-	void ResetPath() 
-	{
-		for (int row = 0; row < ROWS; row++)
-		{
-			for (int col = 0; col < COLS; col++)
-			{
-				isInPath[row][col] = false;
-			}
-		}
-	}
+        while (true)
+        {
+            Display();
+            Input();
+            mGrid->BuildPath(mPlayerCoord, mCursorCoord);
+        }
+    }
 
-	void Path() 
-	{	
-		ResetPath();
+private:
+    void Display()
+    {
+        gotoxy(0, 0); //refresh
 
-		int diffRow = cursorRow - playerRow;
-		int lenghtRow = std::abs(diffRow);
-		if (lenghtRow != 0) 
-		{
-			int dirRow = diffRow / lenghtRow;
-			for (int row = 0; row < lenghtRow; row++)
-			{
-				isInPath[playerRow + dirRow * row][playerCol] = true;
-			}
-		}
+        for (int row = 0; row < mGrid->RowCount; row++)
+        {
+            for (int col = 0; col < mGrid->ColCount; col++)
+            {
+                std::cout << "[";
 
-		int diffCol = cursorCol - playerCol;
-		int lenghtCol = std::abs(diffCol);
-		if (lenghtCol != 0) 
-		{
-			int dirCol = diffCol / lenghtCol;
-			for (int col = 0; col < lenghtCol; col++)
-			{
-				isInPath[playerRow + diffRow][playerCol + dirCol * col] = true;
-			}
-		}
-	}
+                if (mCursorCoord->Is(row, col))
+                {
+                    std::cout << BG_GREEN;
+                }
+                else if (mGrid->GetTile(row, col)->path)
+                {
+                    std::cout << BG_RED;
+                }
 
+                if (mPlayerCoord->Is(row, col))
+                {
+                    std::cout << PLAYER;
+                }
+                else
+                {
+                    std::cout << map[row][col];
+                }
 
-	void Display()
-	{
-		//Display
-		for (int row = 0; row < ROWS; row++)
-		{
-			for (int col = 0; col < COLS; col++)
-			{
-				std::cout << "[";
+                std::cout << DEFAULT;
 
-				if (cursorRow == row && cursorCol == col)
-				{
-					std::cout << BG_GREEN;
-				}
-				else if (isInPath[row][col])
-				{
-					std::cout << BG_RED;
-				}
+                std::cout << "]";
+            }
 
-				if (playerRow == row && playerCol == col)
-				{
-					std::cout << "O";
-				}
+            std::cout << std::endl;
+        }
+    }
 
-				else
-				{
-					std::cout << " ";
-				}
+    void Input()
+    {
+        while (true)
+        {
+            int input = _getch();
+            switch (input)
+            {
+            case 'z':
+                mCursorCoord->AddRow(-1);
+                return;
 
-				std::cout << DEFAULT;
+            case 's':
+                mCursorCoord->AddRow(1);
+                return;
 
-				std::cout << "]";
-			}
+            case 'q':
+                mCursorCoord->AddCol(-1);
+                return;
 
-			std::cout << std::endl;
-		}
-	}
+            case 'd':
+                mCursorCoord->AddCol(1);
+                return;
 
-	void Input()
-	{
-		while (true) 
-		{
-			int input = _getch();
-			switch (input)
-			{
-			case 'z':
-				cursorRow = std::max(0, cursorRow - 1);
-				return;
-
-			case 's':
-				cursorRow = std::min(ROWS - 1, cursorRow + 1);
-				return;
-
-			case 'q':
-				cursorCol = std::max(0, cursorCol - 1);
-				return;
-
-			case 'd':
-				cursorCol = std::min(COLS - 1, cursorCol + 1);
-				return;
-
-			case '\r':
-				playerCol = cursorCol;
-				playerRow = cursorRow;
-				return;
-			}
-
-		}
-		
-		system("cls");
-	}
+            case '\r':
+                mPlayerCoord->Set(mCursorCoord);
+                return;
+            }
+        }
+    }
 };
 
 int main()
 {
-	hidecursor();
+    App app;
 
-	Grid grid;
+    app.Run();
 
-	grid.Run();
-
-	return 0;
+    return 0;
 }
