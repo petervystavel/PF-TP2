@@ -1,6 +1,7 @@
 #include "Grid.h"
 
 #include <queue>
+#include <algorithm>
 
 Grid::Grid(const std::vector< std::vector<char>>& map)
 {
@@ -24,7 +25,7 @@ Grid::Grid(const std::vector< std::vector<char>>& map)
     }
 }
 
-void Grid::ResetTiles()
+void Grid::Reset()
 {
     for (int row = 0; row < RowCount; row++)
     {
@@ -38,25 +39,28 @@ void Grid::ResetTiles()
     }
 }
 
-Tile* Grid::GetTile(int row, int col)
+bool Grid::IsValidIndex(GridCoord coord)
 {
-    if (row < 0 || row >= RowCount)
-        return nullptr;
+    if (coord.row < 0 || coord.row >= RowCount)
+        return false;
 
-    if (col < 0 || col >= ColCount)
-        return nullptr;
-
-    return &mTiles[row][col];
+    if (coord.col < 0 || coord.col >= ColCount)
+        return false;
 }
 
-Tile* Grid::GetTile(const GridCoord* coord)
+Tile* Grid::GetTile(GridCoord coord)
 {
-    return &mTiles[coord->mRow][coord->mCol];
+    if (IsValidIndex(coord) == false)
+        return nullptr;
+
+    return &mTiles[coord.row][coord.col];
 }
 
-bool Grid::BuildPath(const GridCoord* startCoord, const GridCoord* endCoord)
+std::vector<Tile*> Grid::BuildPath(GridCoord startCoord, GridCoord endCoord)
 {
-    ResetTiles();
+    Reset();
+
+    std::vector<Tile*> path;
 
     Tile* start = GetTile(startCoord);
     Tile* end = GetTile(endCoord);
@@ -74,11 +78,13 @@ bool Grid::BuildPath(const GridCoord* startCoord, const GridCoord* endCoord)
         {
             while (current != nullptr)
             {
-                current->path = true;
+                path.push_back(current);
                 current = current->cameFrom;
             }
 
-            return true;
+            std::reverse(path.begin(), path.end());
+
+            return path;
         }
 
         constexpr int directions[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
@@ -88,7 +94,7 @@ bool Grid::BuildPath(const GridCoord* startCoord, const GridCoord* endCoord)
             int row = current->row + directions[i][0];
             int col = current->col + directions[i][1];
 
-            Tile* neighbor = GetTile(row, col);
+            Tile* neighbor = GetTile({ row, col });
             if (neighbor == nullptr)
                 continue;
 
@@ -104,12 +110,5 @@ bool Grid::BuildPath(const GridCoord* startCoord, const GridCoord* endCoord)
         }
     }
 
-    return false;
-}
-
-GridCoord* Grid::CreateCoord(int row, int col)
-{
-    GridCoord* out = new GridCoord(row, col, RowCount, ColCount);
-
-    return out;
+    return path;
 }

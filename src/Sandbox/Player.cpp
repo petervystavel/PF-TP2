@@ -1,5 +1,8 @@
-#include "DummyEntity.h"
+#include "Player.h"
 
-void Player::OnCollision(Entity*)
+#include "SandboxScene.h"
+
+void Player::OnInitialize()
 {
+    mpScene = GetScene<SandboxScene>();
 }

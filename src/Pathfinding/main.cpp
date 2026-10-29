@@ -26,8 +26,8 @@ class App
 {
     Grid* mGrid;
 
-    GridCoord* mPlayerCoord;
-    GridCoord* mCursorCoord;
+    GridCoord mPlayerCoord;
+    GridCoord mCursorCoord;
 
     std::vector<std::vector<char>> map =
     {
@@ -47,15 +47,13 @@ public:
     App()
     {
         mGrid = new Grid(map);
-        mPlayerCoord = mGrid->CreateCoord();
-        mCursorCoord = mGrid->CreateCoord();
+        mPlayerCoord = { 0, 0 };
+        mCursorCoord = { 0, 0 };
     }
 
     ~App()
     {
         delete mGrid;
-        delete mPlayerCoord;
-        delete mCursorCoord;
     }
 
     void Run()
@@ -65,8 +63,15 @@ public:
         while (true)
         {
             Display();
+
             Input();
-            mGrid->BuildPath(mPlayerCoord, mCursorCoord);
+
+            std::vector<Tile*> path = mGrid->BuildPath(mPlayerCoord, mCursorCoord);
+
+            for (int i = 0; i < path.size(); ++i)
+            {
+                path[i]->path = true;
+            }
         }
     }
 
@@ -81,16 +86,16 @@ private:
             {
                 std::cout << "[";
 
-                if (mCursorCoord->Is(row, col))
+                if (mCursorCoord.Is(row, col))
                 {
                     std::cout << BG_GREEN;
                 }
-                else if (mGrid->GetTile(row, col)->path)
+                else if (mGrid->GetTile({ row, col })->path)
                 {
                     std::cout << BG_RED;
                 }
 
-                if (mPlayerCoord->Is(row, col))
+                if (mPlayerCoord.Is(row, col))
                 {
                     std::cout << PLAYER;
                 }
@@ -113,26 +118,39 @@ private:
         while (true)
         {
             int input = _getch();
+            GridCoord newCoord;
             switch (input)
             {
             case 'z':
-                mCursorCoord->AddRow(-1);
+                newCoord = { mCursorCoord.row - 1, mCursorCoord.col };
+                if (mGrid->IsValidIndex(newCoord))
+                    mCursorCoord = newCoord;
+
                 return;
 
             case 's':
-                mCursorCoord->AddRow(1);
+                newCoord = { mCursorCoord.row + 1, mCursorCoord.col };
+                if (mGrid->IsValidIndex(newCoord))
+                    mCursorCoord = newCoord;
+
                 return;
 
             case 'q':
-                mCursorCoord->AddCol(-1);
+                newCoord = { mCursorCoord.row, mCursorCoord.col - 1 };
+                if (mGrid->IsValidIndex(newCoord))
+                    mCursorCoord = newCoord;
+
                 return;
 
             case 'd':
-                mCursorCoord->AddCol(1);
+                newCoord = { mCursorCoord.row, mCursorCoord.col + 1 };
+                if (mGrid->IsValidIndex(newCoord))
+                    mCursorCoord = newCoord;
+
                 return;
 
             case '\r':
-                mPlayerCoord->Set(mCursorCoord);
+                mPlayerCoord = mCursorCoord;
                 return;
             }
         }

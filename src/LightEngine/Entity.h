@@ -8,6 +8,12 @@ struct SDL_Renderer;
 
 class Scene;
 
+struct Position
+{
+    float x, y;
+    float ratioX = 0.5f, ratioY = 0.5f;
+};
+
 class Entity
 {
     struct Target

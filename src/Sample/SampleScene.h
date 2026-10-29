@@ -4,7 +4,7 @@
 
 class Player;
 
-class SanboxScene : public Scene
+class SandboxScene : public Scene
 {
     Player* mpEntity1 = nullptr;
     Player* mpEntity2 = nullptr;
