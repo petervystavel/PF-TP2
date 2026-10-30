@@ -24,25 +24,25 @@ void SandboxScene::OnInitialize()
     int width = GetWindowWidth();
     int height = GetWindowHeight();
 
-    float cellWidth = width / mpGrid->ColCount;
-    float cellHeight = height / mpGrid->RowCount;
+    float tileWidth = width / mpGrid->ColCount;
+    float tileHeight = height / mpGrid->RowCount;
 
-    mTileSize.x = mTileSize.y = std::min(cellWidth, cellHeight);
+    mTileSize.x = mTileSize.y = std::min(tileWidth, tileHeight);
 
     mOffset.x = (width - (mTileSize.x * mpGrid->ColCount)) / 2;
     mOffset.y = (height - (mTileSize.y * mpGrid->RowCount)) / 2;
 
     mpPlayer = CreateEntity<Entity>(mTileSize.x / 2, Color::Blue);
-    SetPlayerCoord({ 0,0 });
+    SetPlayerCoord({ 0, 0 });
 }
 
 Color SandboxScene::GetTileColor(int row, int col)
 {
-    Tile* tile = mpGrid->GetTile({ row, col });
-    assert(tile);
-
     if (mMouseCoord.Is(row, col))
         return Color::Green;
+
+    Tile* tile = mpGrid->GetTile({ row, col });
+    assert(tile);
 
     if (tile->obstacle)
         return Color::Red;
@@ -65,13 +65,28 @@ void SandboxScene::OnUpdate()
     mMouseCoord.y = (int)(mousePos.y / mTileSize.y);
 
     //Update
+    if (mIndexBuiltPath < mBuiltPath.size())
+    {
+        mMoveTimer += GetDeltaTime();
+        if (mMoveTimer >= PLAYER_MOVE_DELAY)
+        {
+            Tile* nextTile = mBuiltPath[mIndexBuiltPath];
+            SetPlayerCoord(nextTile->coord);
+
+            mMoveTimer -= PLAYER_MOVE_DELAY;
+            mIndexBuiltPath++;
+        }
+    }
+
     if (mpGrid->IsValidIndex(mMouseCoord))
     {
         bool found = mpGrid->BuildPath(mPlayerCoord, mMouseCoord);
 
         if (found && input->IsMouseDown(SDL_BUTTON_LEFT))
         {
-            SetPlayerCoord(mMouseCoord);
+            mBuiltPath = mpGrid->GeBuiltPath();
+            mIndexBuiltPath = 0;
+            mMoveTimer = 0.f;
         }
     }
 
@@ -85,6 +100,18 @@ void SandboxScene::OnUpdate()
 
             Debug::DrawRectangle(pos, mTileSize, color, true, { 0, 0 }, false);
         }
+    }
+
+    for (int i = mIndexBuiltPath; i < mBuiltPath.size(); ++i)
+    {
+        Tile* tile = mBuiltPath[i];
+
+        float radius = mTileSize.x * 0.25f;
+        Vector2f pos = { mOffset.x + tile->coord.col * mTileSize.x,  mOffset.y + tile->coord.row * mTileSize.y };
+        pos = pos + mTileSize / 2;
+        Color color = Color::Magenta;
+
+        Debug::DrawCircle(pos, radius, color, true, false);
     }
 }
 

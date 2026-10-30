@@ -3,6 +3,8 @@
 #include "Scene.h"
 #include "Grid.h"
 
+constexpr float PLAYER_MOVE_DELAY = 0.25f;
+
 class SandboxScene : public Scene
 {
     Entity* mpPlayer;
@@ -13,6 +15,10 @@ class SandboxScene : public Scene
 
     GridCoord mMouseCoord;
     GridCoord mPlayerCoord;
+
+    std::vector<Tile*> mBuiltPath;
+    int mIndexBuiltPath;
+    float mMoveTimer;
 
 protected:
     void OnInitialize() override;

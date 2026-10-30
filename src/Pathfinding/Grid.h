@@ -11,16 +11,6 @@
 #define OBSTACLE '#'
 #define PLAYER 'O'
 
-struct Tile
-{
-    int row, col;
-    bool obstacle;
-
-    bool path;
-    bool added;
-    Tile* cameFrom;
-};
-
 struct GridCoord
 {
     union
@@ -39,6 +29,21 @@ struct GridCoord
     {
         return this->row == row && this->col == col;
     }
+
+    GridCoord operator+(const GridCoord& coord)
+    {
+        return { row + coord.row, col + coord.col };
+    }
+};
+
+struct Tile
+{
+    GridCoord coord;
+    bool obstacle;
+
+    bool path;
+    bool added;
+    Tile* cameFrom;
 };
 
 class Grid

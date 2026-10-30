@@ -15,8 +15,7 @@ Grid::Grid(const std::vector< std::vector<char>>& map)
         for (int col = 0; col < ColCount; ++col)
         {
             Tile& tile = mTiles[row][col];
-            tile.row = row;
-            tile.col = col;
+            tile.coord = { row, col };
             tile.obstacle = map[row][col] == OBSTACLE;
             tile.added = false;
             tile.path = false;
@@ -58,8 +57,7 @@ Tile* Grid::GetTile(GridCoord coord)
     return &mTiles[coord.row][coord.col];
 }
 
-
-bool Grid::BuildPath(GridCoord startCoord, GridCoord endCoord )
+bool Grid::BuildPath(GridCoord startCoord, GridCoord endCoord)
 {
     Reset();
 
@@ -74,7 +72,7 @@ bool Grid::BuildPath(GridCoord startCoord, GridCoord endCoord )
     {
         Tile* current = remains.front();
         remains.pop();
-        
+
         if (current == end)
         {
             while (current != nullptr)
@@ -89,14 +87,13 @@ bool Grid::BuildPath(GridCoord startCoord, GridCoord endCoord )
             return true;
         }
 
-        constexpr int directions[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
+        constexpr GridCoord directions[4] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
 
         for (int i = 0; i < 4; ++i)
         {
-            int row = current->row + directions[i][0];
-            int col = current->col + directions[i][1];
+            GridCoord coord = current->coord + directions[i];
 
-            Tile* neighbor = GetTile({ row, col });
+            Tile* neighbor = GetTile(coord);
             if (neighbor == nullptr)
                 continue;
 
