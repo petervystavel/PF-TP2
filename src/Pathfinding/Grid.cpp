@@ -37,6 +37,8 @@ void Grid::Reset()
             tile.cameFrom = nullptr;
         }
     }
+
+    mBuiltPath.clear();
 }
 
 bool Grid::IsValidIndex(GridCoord coord)
@@ -56,11 +58,10 @@ Tile* Grid::GetTile(GridCoord coord)
     return &mTiles[coord.row][coord.col];
 }
 
-std::vector<Tile*> Grid::BuildPath(GridCoord startCoord, GridCoord endCoord)
+
+bool Grid::BuildPath(GridCoord startCoord, GridCoord endCoord )
 {
     Reset();
-
-    std::vector<Tile*> path;
 
     Tile* start = GetTile(startCoord);
     Tile* end = GetTile(endCoord);
@@ -78,13 +79,14 @@ std::vector<Tile*> Grid::BuildPath(GridCoord startCoord, GridCoord endCoord)
         {
             while (current != nullptr)
             {
-                path.push_back(current);
+                current->path = true;
+                mBuiltPath.push_back(current);
                 current = current->cameFrom;
             }
 
-            std::reverse(path.begin(), path.end());
+            std::reverse(mBuiltPath.begin(), mBuiltPath.end());
 
-            return path;
+            return true;
         }
 
         constexpr int directions[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
@@ -110,5 +112,5 @@ std::vector<Tile*> Grid::BuildPath(GridCoord startCoord, GridCoord endCoord)
         }
     }
 
-    return path;
+    return false;
 }

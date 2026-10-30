@@ -29,6 +29,8 @@ class App
     GridCoord mPlayerCoord;
     GridCoord mCursorCoord;
 
+    bool mValidPath = false;
+
     std::vector<std::vector<char>> map =
     {
         {' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' },
@@ -66,12 +68,7 @@ public:
 
             Input();
 
-            std::vector<Tile*> path = mGrid->BuildPath(mPlayerCoord, mCursorCoord);
-
-            for (int i = 0; i < path.size(); ++i)
-            {
-                path[i]->path = true;
-            }
+            mValidPath = mGrid->BuildPath(mPlayerCoord, mCursorCoord);
         }
     }
 
@@ -150,7 +147,8 @@ private:
                 return;
 
             case '\r':
-                mPlayerCoord = mCursorCoord;
+                if (mValidPath)
+                    mPlayerCoord = mCursorCoord;
                 return;
             }
         }

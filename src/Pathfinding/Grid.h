@@ -44,6 +44,7 @@ struct GridCoord
 class Grid
 {
     std::vector<std::vector<Tile>> mTiles;
+    std::vector<Tile*> mBuiltPath;
 
 public:
     int RowCount;
@@ -57,5 +58,7 @@ public:
 
     Tile* GetTile(GridCoord coord);
 
-    std::vector<Tile*> BuildPath(GridCoord startCoord, GridCoord endCoord);
+    bool BuildPath(GridCoord startCoord, GridCoord endCoord);
+
+    const std::vector<Tile*>& GeBuiltPath() { return mBuiltPath; }
 };

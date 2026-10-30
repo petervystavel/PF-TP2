@@ -3,22 +3,21 @@
 #include "Scene.h"
 #include "Grid.h"
 
-class Player;
-
 class SandboxScene : public Scene
 {
-    Player* mpPlayer;
+    Entity* mpPlayer;
     Grid* mpGrid;
 
-    Vector2f mCellSize;
-    Vector2f mGap;
+    Vector2f mTileSize;
+    Vector2f mOffset;
 
     GridCoord mMouseCoord;
     GridCoord mPlayerCoord;
 
-public:
+protected:
     void OnInitialize() override;
     void OnUpdate() override;
-    Grid* GetGrid() { return mpGrid; }
+
+    Color GetTileColor(int row, int col);
     void SetPlayerCoord(GridCoord coord);
 };
